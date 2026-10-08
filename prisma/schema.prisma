@@ -1,0 +1,369 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+  // native = جهاز التطوير (ويندوز) + محركات لينكس لسيرفرات cPanel الشائعة،
+  // حتى يعمل العميل المولَّد محلياً بعد رفعه للسيرفر دون إعادة توليد.
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int              @id @default(autoincrement())
+  name           String           @db.VarChar(150)
+  phone          String           @unique @db.VarChar(30)
+  governorate    String?          @db.VarChar(100)
+  passwordHash   String?          @map("password_hash") @db.VarChar(255)
+  // نسخة مشفَّرة قابلة للاسترجاع (AES-256-GCM بمفتاح مشتق من AUTH_SECRET) — لعرضها
+  // للمدير وإرسالها عبر واتساب. التحقق من الدخول يبقى عبر passwordHash حصراً.
+  passwordEnc    String?          @map("password_enc") @db.VarChar(512)
+  loginCode      String?          @map("login_code") @db.VarChar(100)
+  role           Role             @default(visitor)
+  isBanned       Boolean          @default(false) @map("is_banned")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @default(now()) @updatedAt @map("updated_at")
+  permissions    AdminPermission?
+  cart           Cart?
+  memberPrograms MemberProgram[]
+  orders         Order[]
+  reservations   Reservation[]
+  trialRequests  TrialRequest[]
+  projectRequests ProjectRequest[]
+  createdSubs    Subscription[]   @relation("SubscriptionCreator")
+  subscriptions  Subscription[]   @relation("UserSubscriptions")
+  extraCharges   ExtraCharge[]
+
+  @@map("users")
+}
+
+model AdminPermission {
+  id                    Int      @id @default(autoincrement())
+  userId                Int      @unique @map("user_id")
+  canAccessDashboard    Boolean  @default(false) @map("can_access_dashboard")
+  canManageProducts     Boolean  @default(false) @map("can_manage_products")
+  canManageOrders       Boolean  @default(false) @map("can_manage_orders")
+  canManageReservations Boolean  @default(false) @map("can_manage_reservations")
+  canManageMembers      Boolean  @default(false) @map("can_manage_members")
+  canManageDues         Boolean  @default(false) @map("can_manage_dues")
+  canManageServices     Boolean  @default(false) @map("can_manage_services")
+  canManageContent      Boolean  @default(false) @map("can_manage_content")
+  canManageProjects     Boolean  @default(false) @map("can_manage_projects")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at")
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_permissions")
+}
+
+model Work {
+  id            Int            @id @default(autoincrement())
+  title         String         @db.VarChar(200)
+  description   String?        @db.Text
+  imageUrl      String?        @map("image_url") @db.VarChar(500)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at")
+  trialRequests TrialRequest[]
+
+  @@map("works")
+}
+
+model Service {
+  id              Int            @id @default(autoincrement())
+  title           String         @db.VarChar(200)
+  description     String?        @db.Text
+  downloadFileUrl String?        @map("download_file_url") @db.VarChar(500)
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at")
+  images          ServiceImage[]
+  videos          ServiceVideo[]
+
+  @@map("services")
+}
+
+model ServiceImage {
+  id        Int      @id @default(autoincrement())
+  serviceId Int      @map("service_id")
+  imageUrl  String   @map("image_url") @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at")
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+  @@map("service_images")
+}
+
+model ServiceVideo {
+  id        Int      @id @default(autoincrement())
+  serviceId Int      @map("service_id")
+  videoUrl  String   @map("video_url") @db.VarChar(500)
+  title     String?  @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at")
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+  @@map("service_videos")
+}
+
+/**
+ * مبلغ إضافي مستقلّ على المشترك (تحديث خدمة / نظام آخر) — منفصل عن الاشتراك
+ * الأصلي، لكنه يدخل ضمن إجمالي المستحقات (الباقي = amount - paidAmount).
+ */
+model ExtraCharge {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  label      String   @db.VarChar(200)
+  amount     Decimal  @db.Decimal(10, 2)
+  paidAmount Decimal  @default(0) @map("paid_amount") @db.Decimal(10, 2)
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("extra_charges")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(150)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(200)
+  categoryId   Int?          @map("category_id")
+  quantity     Int           @default(0)
+  price        Decimal       @db.Decimal(10, 2)
+  imageUrl     String?       @map("image_url") @db.VarChar(500)
+  status       ProductStatus @default(available)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @default(now()) @updatedAt @map("updated_at")
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  reservations Reservation[]
+
+  @@index([categoryId])
+  @@map("products")
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique @map("user_id")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
+  items     CartItem[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  cartId    Int      @map("cart_id")
+  productId Int      @map("product_id")
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+model Order {
+  id              Int           @id @default(autoincrement())
+  userId          Int           @map("user_id")
+  total           Decimal       @db.Decimal(10, 2)
+  paymentMethod   PaymentMethod @map("payment_method")
+  paymentStatus   PaymentStatus @default(pending) @map("payment_status")
+  orderStatus     OrderStatus   @default(pending) @map("order_status")
+  deliveryName    String?       @map("delivery_name") @db.VarChar(150)
+  deliveryPhone   String?       @map("delivery_phone") @db.VarChar(30)
+  governorate     String?       @db.VarChar(100)
+  address         String?       @db.VarChar(500)
+  nearestLandmark String?       @map("nearest_landmark") @db.VarChar(255)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at")
+  items           OrderItem[]
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int     @map("order_id")
+  productId Int     @map("product_id")
+  quantity  Int     @default(1)
+  unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Reservation {
+  id              Int               @id @default(autoincrement())
+  userId          Int?              @map("user_id")
+  name            String?           @db.VarChar(150)
+  phone           String?           @db.VarChar(30)
+  governorate     String?           @db.VarChar(100)
+  nearestLandmark String?           @map("nearest_landmark") @db.VarChar(255)
+  quantity        Int               @default(1)
+  productId       Int               @map("product_id")
+  price           Decimal           @db.Decimal(10, 2)
+  status          ReservationStatus @default(pending)
+  details         String?           @db.Text
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at")
+  product         Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user            User?             @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([productId])
+  @@map("reservations")
+}
+
+/**
+ * طلب نسخة تجريبية لعمل معروض في قسم الأعمال.
+ * يحفظ لقطة من بيانات الزبون (تُملأ تلقائياً من تسجيله) واسم العمل المطلوب،
+ * مع حالة تبيّن إن تمت الاستجابة للطلب أم لا.
+ */
+model TrialRequest {
+  id          Int                @id @default(autoincrement())
+  userId      Int?               @map("user_id")
+  workId      Int?               @map("work_id")
+  workTitle   String             @map("work_title") @db.VarChar(200)
+  name        String             @db.VarChar(150)
+  phone       String             @db.VarChar(30)
+  governorate String?            @db.VarChar(100)
+  details     String?            @db.Text
+  status      TrialRequestStatus @default(pending)
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @default(now()) @updatedAt @map("updated_at")
+  user        User?              @relation(fields: [userId], references: [id])
+  work        Work?              @relation(fields: [workId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([workId])
+  @@map("trial_requests")
+}
+
+/**
+ * طلب بدء مشروع من زر «ابدأ مشروعك» في الصفحة الرئيسية.
+ * يحفظ لقطة من بيانات الزبون (تُملأ تلقائياً من تسجيله) مع وصف المشروع
+ * والمدة المطلوبة — بدون أي سعر. الحالة تظهر للزبون في الصفحة الرئيسية
+ * وللطاقم في خانة «طلبات المشاريع».
+ */
+model ProjectRequest {
+  id          Int                  @id @default(autoincrement())
+  userId      Int?                 @map("user_id")
+  name        String               @db.VarChar(150)
+  phone       String               @db.VarChar(30)
+  governorate String?              @db.VarChar(100)
+  description String               @db.Text
+  duration    String               @db.VarChar(100)
+  status      ProjectRequestStatus @default(pending)
+  createdAt   DateTime             @default(now()) @map("created_at")
+  updatedAt   DateTime             @default(now()) @updatedAt @map("updated_at")
+  user        User?                @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("project_requests")
+}
+
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  userId      Int       @map("user_id")
+  serviceName String    @map("service_name") @db.VarChar(200)
+  endDate     DateTime? @map("end_date")
+  loginCode   String?   @map("login_code") @db.VarChar(100)
+  totalAmount Decimal   @default(0) @map("total_amount") @db.Decimal(10, 2)
+  paidAmount  Decimal   @default(0) @map("paid_amount") @db.Decimal(10, 2)
+  createdById Int?      @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  createdBy   User?     @relation("SubscriptionCreator", fields: [createdById], references: [id])
+  user        User      @relation("UserSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdById])
+  @@map("subscriptions")
+}
+
+model MemberProgram {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  title     String   @db.VarChar(200)
+  fileUrl   String   @map("file_url") @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("member_programs")
+}
+
+enum Role {
+  visitor
+  member
+  admin
+  manager
+}
+
+enum ProductStatus {
+  available
+  out_of_stock
+  coming_soon
+}
+
+enum PaymentMethod {
+  online
+  cash_on_delivery
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  refunded
+}
+
+enum OrderStatus {
+  pending
+  processing
+  shipping
+  delivered
+}
+
+enum ReservationStatus {
+  pending
+  confirmed
+  cancelled
+  fulfilled
+}
+
+enum TrialRequestStatus {
+  pending
+  responded
+  rejected
+}
+
+enum ProjectRequestStatus {
+  pending
+  reviewing
+  approved
+  in_progress
+  completed
+  rejected
+}

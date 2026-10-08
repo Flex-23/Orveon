@@ -1,0 +1,327 @@
+/* StaggeredMenu — نسخة مدفوعة بالحالة (data-open) عبر CSS transitions، بلا GSAP.
+   الشريط أعلى الصفحة، واللوحة + الطبقات تُحقن في <body> كطبقة fixed تملأ شاشة الجوال. */
+
+/* خلفية صلبة عمداً (أي filter يكسر تموضع العناصر fixed بداخلها). */
+.staggered-menu-wrapper {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 60;
+  background: var(--background);
+  border-bottom: 1px solid var(--line);
+}
+
+.staggered-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+}
+
+.sm-logo {
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.sm-logo-img {
+  display: block;
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+.sm-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--foreground);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1;
+  overflow: visible;
+}
+
+.sm-toggle:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Toggle text cycling (القائمة / إغلاق) */
+.sm-toggle-textWrap {
+  position: relative;
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sm-toggle-textInner {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.sm-toggle-line {
+  display: block;
+  height: 1em;
+  line-height: 1;
+}
+
+.sm-toggle-label {
+  display: inline-block;
+  min-width: 3.2em;
+  text-align: start;
+}
+
+.sm-icon {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  display: inline-flex;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sm-icon-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+}
+
+.sm-icon-line-v {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.staggered-menu-wrapper[data-open] .sm-icon {
+  transform: rotate(135deg);
+}
+
+/* ===== الطبقة المحقونة في body — تملأ الشاشة بالكامل ===== */
+.staggered-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+}
+
+/* الطبقات الملوّنة المتدرّجة خلف اللوحة */
+.sm-prelayers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.sm-prelayer {
+  position: absolute;
+  inset: 0;
+  transform: translateX(100%);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* RTL: translateX(100%) goes left, we need it to go right (off-screen) */
+[dir="rtl"] .sm-prelayer {
+  transform: translateX(-100%);
+}
+
+.sm-prelayer:nth-child(2) {
+  transition-delay: 0.06s;
+}
+
+.sm-prelayer:nth-child(3) {
+  transition-delay: 0.12s;
+}
+
+[data-position="left"] .sm-prelayer {
+  transform: translateX(-100%);
+}
+
+[dir="rtl"] [data-position="left"] .sm-prelayer {
+  transform: translateX(100%);
+}
+
+.staggered-menu-overlay[data-open] .sm-prelayer {
+  transform: translateX(0);
+}
+
+/* اللوحة الرئيسية */
+.staggered-menu-panel {
+  position: absolute;
+  inset: 0;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+  padding: 5.5rem 1.75rem 2rem;
+  overflow-y: auto;
+  z-index: 10;
+  pointer-events: none;
+  transform: translateX(100%);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: 0.1s;
+}
+
+/* RTL: panel slides off to the physical right */
+[dir="rtl"] .staggered-menu-panel {
+  transform: translateX(-100%);
+}
+
+[data-position="left"] .staggered-menu-panel {
+  transform: translateX(-100%);
+}
+
+[dir="rtl"] [data-position="left"] .staggered-menu-panel {
+  transform: translateX(100%);
+}
+
+.staggered-menu-overlay[data-open] .staggered-menu-panel {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.sm-panel-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sm-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sm-panel-itemWrap {
+  position: relative;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.sm-panel-item {
+  position: relative;
+  color: var(--foreground);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 8.5vw, 2.5rem);
+  cursor: pointer;
+  line-height: 1.05;
+  letter-spacing: normal;
+  transition: color 0.25s;
+  display: inline-block;
+  text-decoration: none;
+  padding-block: 0.12em;
+  background: none;
+  border: none;
+  text-align: start;
+}
+
+.sm-panel-itemLabel {
+  display: inline-block;
+  transform: translateY(120%);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.staggered-menu-overlay[data-open] .sm-panel-itemLabel {
+  transform: translateY(0);
+  transition-delay: calc(var(--sm-i, 0) * 0.06s + 0.2s);
+}
+
+.sm-panel-item:hover,
+.sm-panel-item:focus-visible {
+  color: var(--sm-accent, #8b88ff);
+}
+
+/* ترقيم اختياري — يسار الكلمة في RTL */
+.sm-panel-list[data-numbering] {
+  counter-reset: smItem;
+}
+
+.sm-panel-list[data-numbering] .sm-panel-item::after {
+  counter-increment: smItem;
+  content: counter(smItem, decimal-leading-zero);
+  position: absolute;
+  top: 0.1em;
+  inset-inline-start: -1.6em;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-mono), monospace;
+  color: var(--sm-accent, #8b88ff);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* التواصل الاجتماعي */
+.sm-socials {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sm-socials-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--sm-accent, #8b88ff);
+}
+
+.sm-socials-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sm-socials-link {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--foreground);
+  text-decoration: none;
+  padding: 2px 0;
+  display: inline-block;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+.sm-socials-list:hover .sm-socials-link:not(:hover) {
+  opacity: 0.4;
+}
+
+.sm-socials-link:hover {
+  color: var(--sm-accent, #8b88ff);
+}
+
+/* تذييل اللوحة (المظهر + تسجيل الخروج) */
+.sm-panel-footer {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-prelayer,
+  .staggered-menu-panel,
+  .sm-panel-itemLabel,
+  .sm-icon {
+    transition: none;
+  }
+}

@@ -1,0 +1,492 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* تفعيل الوضع الليلي عبر إضافة الكلاس .dark على عنصر <html> (يديره next-themes) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =========================================================================
+   لوحة ألوان مخصّصة (بُنيت يدوياً، بلا ألوان shadcn الافتراضية)
+   الوضع النهاري: رمادي بارد ناعم + لمسة نيلية = هوية العلامة. أبيض غير ناصع، حدود واضحة.
+   ========================================================================= */
+:root {
+  /* القاعدة */
+  --background: oklch(0.978 0.002 277); /* أبيض ناعم مريح — ليس ناصعاً */
+  --foreground: oklch(0.21 0.012 277); /* نص قريب من الأسود */
+
+  /* أسطح وبطاقات */
+  --surface: oklch(0.946 0.004 277);
+  --surface-2: oklch(0.992 0.0025 277);
+  --card: oklch(0.996 0.002 277);
+  --card-foreground: oklch(0.21 0.012 277);
+  --popover: oklch(0.996 0.002 277);
+  --popover-foreground: oklch(0.21 0.012 277);
+  --dash: oklch(0.948 0.004 277); /* قاعدة لوحة التحكم */
+  --panel: oklch(0.996 0.002 277); /* بطاقات لوحة التحكم */
+
+  /* نص مكتوم */
+  --muted: oklch(0.505 0.012 277);
+  --muted-foreground: oklch(0.505 0.012 277);
+
+  /* حدود/فواصل واضحة */
+  --border: oklch(83.649% 0.00284 285.844);
+  --line: oklch(79.956% 0.00566 286.039);
+  --input: oklch(0.8 0.008 277);
+  --ring: oklch(0.55 0.13 277);
+
+  /* اللون المميّز — نيلي */
+  --accent: oklch(0.955 0.013 277); /* سطح تمييز خفيف (hover) */
+  --accent-strong: #4338ca;
+  --accent-contrast: #ffffff;
+  --accent-foreground: oklch(0.25 0.013 277);
+
+  /* رموز shadcn — متناسقة مع العلامة بدل المحايد الافتراضي */
+  --primary: #4338ca;
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.94 0.006 277);
+  --secondary-foreground: oklch(0.25 0.012 277);
+  --destructive: oklch(0.58 0.22 27);
+
+  --chart-1: oklch(0.55 0.18 277);
+  --chart-2: oklch(0.62 0.14 230);
+  --chart-3: oklch(0.64 0.15 160);
+  --chart-4: oklch(0.72 0.16 70);
+  --chart-5: oklch(0.6 0.2 20);
+
+  --radius: 0.625rem;
+
+  --sidebar: oklch(0.992 0.0025 277);
+  --sidebar-foreground: oklch(0.21 0.012 277);
+  --sidebar-primary: #4338ca;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.955 0.013 277);
+  --sidebar-accent-foreground: oklch(0.25 0.013 277);
+  --sidebar-border: oklch(0.84 0.006 277);
+  --sidebar-ring: oklch(0.55 0.13 277);
+}
+
+/* الوضع الليلي: داكن نيلي (slate) متناسق مع اللون المميّز #8b88ff (درجة اللون 282).
+   مرفوع الإضاءة قليلاً (أقل سواداً) — كل الأسطح تتدرّج فوق القاعدة بفروق ثابتة. */
+.dark {
+  /* القاعدة */
+  --background: oklch(0.26 0.016 282);
+  --foreground: oklch(0.975 0.003 282);
+
+  /* أسطح وبطاقات */
+  --surface: oklch(0.29 0.017 282);
+  --surface-2: oklch(0.325 0.018 282);
+  --card: oklch(0.305 0.017 282);
+  --card-foreground: oklch(0.975 0.003 282);
+  --popover: oklch(0.305 0.017 282);
+  --popover-foreground: oklch(0.975 0.003 282);
+  --dash: oklch(0.245 0.015 282);
+  --panel: oklch(0.305 0.017 282);
+
+  /* نص مكتوم — أفتح قليلاً ليبقى مقروءاً على الأسطح المرفوعة */
+  --muted: oklch(0.73 0.014 282);
+  --muted-foreground: oklch(0.75 0.014 282);
+
+  /* حدود/فواصل */
+  --border: oklch(1 0 0 / 14%);
+  --line: rgba(255, 255, 255, 0.12);
+  --input: oklch(1 0 0 / 17%);
+  --ring: oklch(0.62 0.08 282);
+
+  /* اللون المميّز */
+  --accent: oklch(0.34 0.022 282);
+  --accent-strong: #8b88ff;
+  --accent-contrast: #0e0e1c;
+  --accent-foreground: oklch(0.975 0.003 282);
+
+  /* رموز shadcn — متناسقة مع العلامة */
+  --primary: #8b88ff;
+  --primary-foreground: oklch(0.18 0.012 282);
+  --secondary: oklch(0.34 0.02 282);
+  --secondary-foreground: oklch(0.975 0.003 282);
+  --destructive: oklch(0.7 0.19 22);
+
+  --chart-1: oklch(0.66 0.18 277);
+  --chart-2: oklch(0.66 0.13 230);
+  --chart-3: oklch(0.68 0.14 160);
+  --chart-4: oklch(0.75 0.15 70);
+  --chart-5: oklch(0.66 0.2 20);
+
+  --sidebar: oklch(0.29 0.017 282);
+  --sidebar-foreground: oklch(0.975 0.003 282);
+  --sidebar-primary: #8b88ff;
+  --sidebar-primary-foreground: oklch(0.18 0.012 282);
+  --sidebar-accent: oklch(0.34 0.022 282);
+  --sidebar-accent-foreground: oklch(0.975 0.003 282);
+  --sidebar-border: oklch(1 0 0 / 14%);
+  --sidebar-ring: oklch(0.62 0.08 282);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-dash: var(--dash);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --font-sans: var(--font-cairo);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-cairo);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* الكرة الأرضية ألوانها سماوية فاتحة جداً تتلاشى على خلفية الوضع النهاري الفاتحة،
+   لذا نعمّقها ونزيد تشبّعها في النهاري فقط، ونتركها كما هي في الليلي. */
+.rotating-globe {
+  filter: saturate(1.7) brightness(0.72) contrast(1.08);
+}
+
+.dark .rotating-globe {
+  filter: none;
+}
+
+body {
+  font-family: var(--font-cairo), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 30%, transparent);
+}
+
+/* مؤشّر تركيز واضح للوحة المفاتيح (وصولية) */
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+/* وسم تقني لاتيني صغير */
+.spec {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* أرقام جدولية */
+.tabular {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* شبكة ناعمة كعمق للخلفيات الداكنة */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* نقاط دقيقة بديلة للشبكة — أهدأ وأكثر فخامة */
+.bg-dots {
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* حبيبات/ضوضاء ناعمة فوق السطوح لكسر التسطّح الرقمي (طبقة علوية) */
+.noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* توهّج إشعاعي بلون مميّز — عمق ناعم بدل التدرّجات الصاخبة */
+.glow {
+  background: radial-gradient(closest-side,
+      color-mix(in oklab, var(--accent) 55%, transparent),
+      transparent);
+}
+
+/* بطاقة زجاجية حقيقية: شفافية + ضباب + حافة داخلية تحاكي انكسار الضوء */
+.glass {
+  background: color-mix(in oklab, var(--surface-2) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklab, #fff 22%, transparent),
+    0 24px 60px -28px color-mix(in oklab, var(--accent) 45%, transparent),
+    0 8px 24px -16px rgba(0, 0, 0, 0.4);
+}
+
+.dark .glass {
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklab, #fff 8%, transparent),
+    0 30px 70px -30px color-mix(in oklab, var(--accent) 60%, transparent),
+    0 10px 30px -18px rgba(0, 0, 0, 0.65);
+}
+
+/* حدّ متوهّج ناعم يُضيء حافة البطاقة بلون مميّز خفيف */
+.edge-glow {
+  position: relative;
+}
+
+.edge-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg,
+      color-mix(in oklab, var(--accent) 55%, transparent),
+      transparent 38%,
+      transparent 62%,
+      color-mix(in oklab, var(--accent) 28%, transparent));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ظلّ مائل بلون مميّز بدل الأسود الميّت */
+.shadow-glow {
+  box-shadow: 0 26px 60px -30px color-mix(in oklab, var(--accent) 60%, transparent);
+}
+
+/* خلفية mesh متحركة — عمق عضوي بدل التدرّجات الصاخبة */
+.mesh-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%,
+      color-mix(in oklab, var(--accent) 18%, transparent),
+      transparent 55%),
+    radial-gradient(ellipse 70% 50% at 85% 75%,
+      color-mix(in oklab, var(--accent-strong) 12%, transparent),
+      transparent 50%),
+    var(--background);
+}
+
+@keyframes mesh-drift {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-2%, 2%) scale(1.04);
+  }
+}
+
+.mesh-orb {
+  background: radial-gradient(circle at 35% 35%,
+      color-mix(in oklab, var(--accent) 70%, #fff),
+      color-mix(in oklab, var(--accent-strong) 55%, transparent) 55%,
+      transparent 72%);
+  animation: mesh-drift 14s ease-in-out infinite;
+}
+
+/* بطاقة تتبّع ضوء المؤشر عند المرور */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  background: radial-gradient(600px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      color-mix(in oklab, var(--accent) 14%, transparent),
+      transparent 42%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+/* حدّ متدرّج متحرّك */
+@keyframes border-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.gradient-border {
+  position: relative;
+  isolation: isolate;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg,
+      var(--accent),
+      transparent 25%,
+      transparent 75%,
+      var(--accent-strong));
+  animation: border-spin 8s linear infinite;
+  opacity: 0.55;
+}
+
+/* تمرير أفقي بدون شريط */
+.scroll-x {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+.snap-card {
+  scroll-snap-align: start;
+}
+
+/* خط زخرفي يُرسم عند الظهور */
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 200;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.draw-line path {
+  stroke-dasharray: 200;
+  animation: draw-line 1.2s ease forwards 0.4s;
+}
+
+/* عنوان تمهيدي (kicker) مع خط قصير بلون مميّز قبل النص — يحترم RTL */
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.kicker::before {
+  content: "";
+  inline-size: 2rem;
+  block-size: 1px;
+  background: linear-gradient(to left,
+      transparent,
+      color-mix(in oklab, var(--accent) 85%, transparent));
+}
+
+/* أرقام/أحرف عرضية مفرّغة بحدّ بلون مميّز — لمسة تحريرية فخمة */
+.outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in oklab, var(--accent) 50%, transparent);
+}
+
+/* خطّ سفلي متحرّك للروابط النصّية — ينمو من جهة البداية (يمين في RTL) */
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-size: 0% 1.5px;
+  padding-bottom: 2px;
+  transition: background-size 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.link-underline:hover,
+.link-underline:focus-visible {
+  background-size: 100% 1.5px;
+}
+
+/* فاصل هواء رفيع متلاشٍ من المنتصف */
+.rule-fade {
+  block-size: 1px;
+  border: 0;
+  background: linear-gradient(to right,
+      transparent,
+      var(--border) 18%,
+      var(--border) 82%,
+      transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-ping,
+  .animate-pulse,
+  .mesh-orb,
+  .gradient-border::before,
+  .draw-line path {
+    animation: none;
+  }
+
+  .mesh-orb {
+    transform: none;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+  }
+}
